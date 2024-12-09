@@ -53,3 +53,5 @@ let deposit = accounting.Deposit
 let accountingDeposit = deposit cid operationDetails |> Async.RunSynchronously
 
 printfn "%A" accountingDeposit
+
+Console.ReadLine() |> ignore
