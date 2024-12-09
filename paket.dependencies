@@ -4,3 +4,4 @@ storage: none
 nuget FSharp.Core
 nuget FCQRS.Model
 nuget FsToolkit.ErrorHandling
+nuget FCQRS
