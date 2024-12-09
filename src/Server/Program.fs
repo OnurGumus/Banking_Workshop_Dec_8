@@ -8,8 +8,24 @@ open Microsoft.Extensions.Logging
 open Banking.Application.Command.Accounting
 open System
 open FCQRS.Model.Data
+open System.IO
+open Hocon.Extensions.Configuration
 
-let configBuilder =  ConfigurationBuilder()
+
+let tempFile = Path.GetTempFileName()
+let connString = $"Data Source={tempFile}"
+
+
+let configBuilder =
+    ConfigurationBuilder()
+        .AddEnvironmentVariables()
+#if DEBUG
+        .AddHoconFile("/workspaces/Banking/src/Server/config.hocon")
+#else
+        .AddHoconFile("config.hocon")
+#endif
+      
+        
 let config = configBuilder.Build()
 let lf = LoggerFactory.Create(fun builder -> builder.AddConsole().AddDebug() |> ignore)
 

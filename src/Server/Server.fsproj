@@ -12,6 +12,7 @@
     <ProjectReference Include="..\Model\Model.fsproj" />
     <ProjectReference Include="..\Application\Application.fsproj" />
     <ProjectReference Include="..\Command\Command.fsproj" />
+    <Content Include="config.hocon" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

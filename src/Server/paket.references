@@ -1,2 +1,5 @@
 FSharp.Core
 FCQRS.Model
+FCQRS
+Hocon.Extensions.Configuration
+Microsoft.Data.Sqlite

@@ -5,3 +5,5 @@ nuget FSharp.Core
 nuget FCQRS.Model
 nuget FsToolkit.ErrorHandling
 nuget FCQRS
+nuget Hocon.Extensions.Configuration
+nuget Microsoft.Data.Sqlite

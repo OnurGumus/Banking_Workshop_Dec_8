@@ -5,6 +5,8 @@ open Microsoft.Extensions.Configuration
 open Banking.Application.Command.Accounting
 
 type AppEnv(config: IConfiguration, loggerFactory: ILoggerFactory) =
+    let mutable commandApi = Unchecked.defaultof<_>
+
     interface ILoggerFactory with
         member this.AddProvider(provider: ILoggerProvider) : unit = loggerFactory.AddProvider(provider)
         member this.Dispose() : unit = loggerFactory.Dispose()
@@ -22,9 +24,13 @@ type AppEnv(config: IConfiguration, loggerFactory: ILoggerFactory) =
         member _.GetSection key = config.GetSection(key)
 
     interface IAccounting with
-        member _.Deposit cid = failwith "Not implemented"
-        member _.Withdraw cid = failwith "Not implemented"
-        member _.Transfer cid = failwith "Not implemented"
+        member _.Deposit cid = 
+            commandApi.Deposit cid
+        member _.Withdraw cid = 
+            commandApi.Withdraw cid
+        member _.Transfer cid =
+            commandApi.Transfer cid
 
     member this.Reset() = this.Init()
-    member _.Init() = ()
+    member this.Init() = 
+        commandApi <- Banking.Command.API.api this
