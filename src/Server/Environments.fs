@@ -31,6 +31,9 @@ type AppEnv(config: IConfiguration, loggerFactory: ILoggerFactory) =
         member _.Transfer cid =
             commandApi.Transfer cid
 
-    member this.Reset() = this.Init()
+    member this.Reset() = 
+            Migrations.reset config
+            this.Init()
     member this.Init() = 
+        Migrations.init config
         commandApi <- Banking.Command.API.api this

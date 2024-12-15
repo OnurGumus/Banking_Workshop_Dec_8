@@ -19,7 +19,8 @@ module internal Actor =
 
     let applyEvent (event: Event<_>) (state: State ) =
         match event.EventDetails, state with
-        | BalanceUpdated details, _ -> { Account = Some details.Account }
+        | BalanceUpdated details, _ -> 
+            { Account = Some details.Account }
 
     let handleCommand (cmd: Command<_>) (state: State) =
         match cmd.CommandDetails, state with

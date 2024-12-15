@@ -7,3 +7,6 @@ nuget FsToolkit.ErrorHandling
 nuget FCQRS
 nuget Hocon.Extensions.Configuration
 nuget Microsoft.Data.Sqlite
+nuget FluentMigrator.Runner.SQLite
+nuget FCQRS.Serialization
+nuget FCQRS.SQLProvider

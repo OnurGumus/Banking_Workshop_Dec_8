@@ -15,15 +15,21 @@ open Hocon.Extensions.Configuration
 let tempFile = Path.GetTempFileName()
 let connString = $"Data Source={tempFile}"
 
-
 let configBuilder =
     ConfigurationBuilder()
         .AddEnvironmentVariables()
 #if DEBUG
-        .AddHoconFile("/workspaces/Banking/src/Server/config.hocon")
+        .AddHoconFile(Path.Combine( __SOURCE_DIRECTORY__ , "config.hocon"))
 #else
         .AddHoconFile("config.hocon")
 #endif
+        // .AddInMemoryCollection(
+        //         dict
+        //                 [|      "config:connection-string", connString
+        //                         "config:akka:persistence:journal:sql:connection-string", connString
+        //                         "config:akka:persistence:snapshot-store:sql:connection-string", connString
+        //                         "config:akka:persistence:query:journal:sql:connection-string", connString |]
+        // )
       
         
 let config = configBuilder.Build()
@@ -55,3 +61,4 @@ let accountingDeposit = deposit cid operationDetails |> Async.RunSynchronously
 printfn "%A" accountingDeposit
 
 Console.ReadLine() |> ignore
+printfn "%s" connString
