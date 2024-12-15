@@ -21,10 +21,11 @@ let api (env: _) =
     let actorApi = FCQRS.Actor.api config loggerFactory
     let actorFactories = Command.Domain.ActorFactories.factories env actorApi
     let accountSubs =  actorApi.CreateCommandSubscription actorFactories.AccountFactory
+    let transferSubs = actorApi.CreateCommandSubscription actorFactories.TransferFactory
 
     { new IAPI with
         member _.Withdraw cid = failwith "Not implemented"
         member _.Deposit cid =
             AccountingHandler.deposit (accountSubs  cid)
-        member _.Transfer cid = failwith "Not implemented"
+        member _.Transfer cid = TransferHandle.deposit (transferSubs cid)
         member _.ActorApi = actorApi }
