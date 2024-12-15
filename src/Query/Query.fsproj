@@ -5,6 +5,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Migrations.fs" />
+    <Compile Include="SqlProvider.fs" />
+    <Compile Include="AccountHandler.fs" />
+    <Compile Include="Projection.fs" />
+    <Compile Include="API.fs" />
     <Content Include="paket.references" />
   </ItemGroup>
   <ItemGroup>

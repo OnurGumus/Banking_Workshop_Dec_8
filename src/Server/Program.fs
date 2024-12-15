@@ -10,7 +10,8 @@ open System
 open FCQRS.Model.Data
 open System.IO
 open Hocon.Extensions.Configuration
-
+open FCQRS.Model.Query
+open Banking.Application.Event
 
 let tempFile = Path.GetTempFileName()
 let connString = $"Data Source={tempFile}"
@@ -23,13 +24,13 @@ let configBuilder =
 #else
         .AddHoconFile("config.hocon")
 #endif
-        // .AddInMemoryCollection(
-        //         dict
-        //                 [|      "config:connection-string", connString
-        //                         "config:akka:persistence:journal:sql:connection-string", connString
-        //                         "config:akka:persistence:snapshot-store:sql:connection-string", connString
-        //                         "config:akka:persistence:query:journal:sql:connection-string", connString |]
-        // )
+        .AddInMemoryCollection(
+                dict
+                        [|      "config:connection-string", connString
+                                "config:akka:persistence:journal:sql:connection-string", connString
+                                "config:akka:persistence:snapshot-store:sql:connection-string", connString
+                                "config:akka:persistence:query:journal:sql:connection-string", connString |]
+        )
       
         
 let config = configBuilder.Build()
@@ -41,6 +42,7 @@ let appEnv :AppEnv = new AppEnv(config,lf)
 appEnv.Reset()
 
 let accounting = appEnv :> IAccounting
+let query = appEnv :> IQuery<DataEvent>
 
 let cid: CID = Guid.NewGuid() |> string |> ValueLens.CreateAsResult |> Result.value
 
@@ -60,5 +62,10 @@ let accountingDeposit = deposit cid operationDetails |> Async.RunSynchronously
 
 printfn "%A" accountingDeposit
 
+
 Console.ReadLine() |> ignore
+
+let accounts = query.Query<Account>() |> Async.RunSynchronously
+printfn "Accounts %A" accounts
+
 printfn "%s" connString
