@@ -12,6 +12,7 @@ open System.IO
 open Hocon.Extensions.Configuration
 open FCQRS.Model.Query
 open Banking.Application.Event
+open System.Threading
 
 let tempFile = Path.GetTempFileName()
 let connString = $"Data Source={tempFile}"
@@ -58,14 +59,16 @@ let operationDetails = { UserIdentity = userIdentity; AccountName = accountName 
 
 let deposit = accounting.Deposit
 
+let readSideSubs = query.Subscribe((fun e -> e.CID = cid), 1, ignore, CancellationToken.None) |> Async.StartImmediateAsTask
 let accountingDeposit = deposit cid operationDetails |> Async.RunSynchronously
 
 printfn "%A" accountingDeposit
 
+readSideSubs.Wait()
+let accounts = query.Query<Account>(filter = Or(Greater("Balance", 9), 
+        Equal("AccountName","foo")), take = 1, skip = 0, orderby = "Balance") |> Async.RunSynchronously
+printfn "Accounts %A" accounts
 
 Console.ReadLine() |> ignore
-
-let accounts = query.Query<Account>() |> Async.RunSynchronously
-printfn "Accounts %A" accounts
 
 printfn "%s" connString
