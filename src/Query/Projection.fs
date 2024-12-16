@@ -1,14 +1,10 @@
 module internal Banking.Query.Projection
 
 open FSharp.Data.Sql.Common
-open FCQRS.Actor
-open Akka.Streams
 open Akka.Persistence.Query
 open FCQRS.Common
-open FCQRS.Model.Query
 open Banking.Command.Domain
 open SqlProvider
-open Microsoft.Extensions.Logging
 
 type CID = FCQRS.Model.Data.CID
 
