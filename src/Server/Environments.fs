@@ -53,13 +53,16 @@ type AppEnv(config: IConfiguration, loggerFactory: ILoggerFactory) =
                     return res |> Seq.cast<'t> |> List.ofSeq
                 }
             member _.Subscribe(cb, cancellationToken) = 
-                let ks = queryApi.Subscribe(cb)
-                cancellationToken.Register(fun _ ->ks.Shutdown()) |> ignore
+                cancellationToken.Register(fun _ -> queryApi.Subscribe(cb).Shutdown()) 
                 
-            member _.Subscribe(filter, take, cb, cancellationToken) = 
-                let ks, res = queryApi.Subscribe(filter, take, cb)
-                cancellationToken.Register(fun _ ->ks.Shutdown()) |> ignore
-                res
+            member _.Subscribe(filter, take, cb, cancellationToken) =
+           
+                    let ks, wait = queryApi.Subscribe(filter, take, cb)
+                    let disp = cancellationToken.Register(fun _ ->ks.Shutdown())
+                    async{  
+                        do! wait
+                        return disp
+                     }
         
     member this.Reset() = 
             Migrations.reset config
