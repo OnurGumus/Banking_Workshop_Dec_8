@@ -3,8 +3,12 @@ open Banking.Model.Data
 
 type AccountEvent =
     | BalanedUpdated of Account
+    
+type TransferDetails = { From: AccountName; To: AccountName; Amount: PositiveMoney }
 
-// A DU for all DTO Style events where IQeury.Subscirbie API can wait it until it happens
-// only used for the read side, not command side.
+type TransferEvent =
+    | TransferCompleted of TransferDetails
+
 type DataEvent = 
-        | AccountEvent of AccountEvent
+    | AccountEvent of AccountEvent
+    | TransferEvent of TransferEvent

@@ -31,5 +31,5 @@ let api (env: _) =
         member _.Withdraw cid = failwith "Not implemented"
         member _.Deposit cid =
             AccountingHandler.deposit (accountSubs  cid)
-        member _.Transfer cid = TransferHandle.deposit (transferSubs cid)
+        member _.Transfer cid = TransferHandler.transfer (transferSubs cid)
         member _.ActorApi = actorApi }

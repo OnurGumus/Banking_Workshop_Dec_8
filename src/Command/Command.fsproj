@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Domain\Account.fs" />
     <Compile Include="Domain\Transfer.fs" />
+    <Compile Include="Domain\TransferSaga.fs" />
     <Compile Include="Domain\ActorFactories.fs" />
     <Compile Include="AccountingHandle.fs" />
     <Compile Include="TransferHandle.fs" />

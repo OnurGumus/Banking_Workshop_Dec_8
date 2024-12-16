@@ -16,10 +16,18 @@ let deposit createSubs : Deposit =
             "Account_" +  
                 (operationDetails.AccountName ^. (Lens.toValidated AccountName.Value_ >-> ShortString.Value_  ))
         async{
-            let! subscr = createSubs actorId (Deposit operationDetails) (fun (e:Event) -> match e with | BalanceUpdated _ -> true)
+            let! subscr = createSubs actorId (Deposit operationDetails) (fun (e:Event) -> e.IsBalanceUpdated)
             
             // convert the type which satisifies Deposit command
             match subscr with
-            | {EventDetails = BalanceUpdated _;   Version  = v } ->  
+            | {
+                  EventDetails = BalanceUpdated _
+                  Version = v
+              } -> 
                 return  v |> ValueLens.TryCreate |> Result.mapError (fun e -> [e.ToString()])
+            | {
+                  EventDetails =   _
+                  Version = v
+              } -> return   Error [sprintf "Deposit failed for account %s" <| actorId.ToString()]
         }
+        

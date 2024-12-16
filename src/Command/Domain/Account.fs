@@ -4,50 +4,92 @@ open Banking.Model.Data
 open FCQRS.Common
 
 type BalanceUpdateDetails ={ Account : Account ; Diff : Money}
-// we define events and commands state
+type AccountMismatch = { TargetAccount : Account; TargetUser : UserIdentity }
 type Event =
     | BalanceUpdated of BalanceUpdateDetails
-
+    | OverdraftAttempted of Account * Money
+    | NoReservationFound
+    | MoneyReserved of Money
+    
 type Command =
     | Deposit of OperationDetails
+    | ReserveMoney of Money
+    | ConfirmReservation
 
-type State = { Account : Account option }
+type State = {
+    Account: Account option
+    Resevations: Event<Event> list
+} 
 
 
-module internal Actor = 
+module internal Actor =
     open FCQRS.Model.Data
-
-    // all persiste events come here and we decide to new state
-    let applyEvent (event: Event<_>) (state: State ) =
+    
+    let applyEvent (event: Event<_>) (_: State as state) =
         match event.EventDetails, state with
-        | BalanceUpdated details, _ -> 
-            { Account = Some details.Account }
+        | BalanceUpdated ( b:BalanceUpdateDetails), _ ->
+            let state  ={ state with Account = Some b.Account }
+            if state.Resevations |> List.exists (fun x -> x.CorrelationId = event.CorrelationId) then
+                { state 
+                    with Resevations = state.Resevations 
+                        |> List.filter (fun x -> x.CorrelationId <> event.CorrelationId) }
+            else state
 
-    // all commands come here and we decide to persist event, your business logic is here
-    let handleCommand (cmd: Command<_>) (state: State) =
+        | MoneyReserved _, _ ->
+            { state with Resevations = state.Resevations @ [event] }
+        
+        | OverdraftAttempted _, _
+        | _ -> state
+
+    let handleCommand (cmd:Command<_>) (state:State)  =
+        let corID = cmd.CorrelationId
         match cmd.CommandDetails, state with
-        | Deposit details , _ ->
-            let account = 
-                match state.Account with
-                | Some a -> 
-                    { a with Balance =  (details.Money |> ValueLens.Value) + a.Balance }
 
+        | ReserveMoney money, _ ->
+            let existingEvent =  
+                state.Resevations |> List.tryFind (fun x -> x.CorrelationId = corID) 
+            let eventAcion : EventAction<Event> =
+                match existingEvent with
+                | Some x -> x |> PublishEvent
                 | None -> 
-                {   AccountName = details.AccountName; 
-                    Balance = details.Money |> ValueLens.Value; 
-                    Owner = details.UserIdentity
-                 }
+                    // neeed to check existing balance with existing reservations
+                    if  state.Account.Value.Balance < money then
+                        (OverdraftAttempted (state.Account.Value, money)) |> PersistEvent
+                    else
+                        (MoneyReserved money ) |> PersistEvent
+            eventAcion
 
-            BalanceUpdated { Account = account; Diff = details.Money |> ValueLens.Value } |> PersistEvent
+        | ConfirmReservation, _ ->
+           let findReservation = state.Resevations |> List.tryFind (fun x -> x.CorrelationId = corID) |> Option.map (fun x -> x.EventDetails) 
+           match findReservation with
+            
+                | Some (MoneyReserved(m)) ->
+                    (BalanceUpdated 
+                        { 
+                            Account = 
+                                { state.Account.Value 
+                                    with Balance = state.Account.Value.Balance - (m |> ValueLens.Value) }; 
 
-    // initialize shard for avoiding first time hit performance issue
+                            Diff = m
+
+                        } ) 
+                            |> PersistEvent
+                | _ -> (NoReservationFound) |> DeferEvent
+           
+        | Deposit{ Money = (ResultValue money); UserIdentity = userIdentity; AccountName = accountName }, _ ->
+
+         if state.Account.IsNone then
+            let newAccount = { AccountName = accountName; Balance = money; Owner = userIdentity }
+            (BalanceUpdated { Account = newAccount; Diff = money } ) |> PersistEvent
+            else
+                let account = { state.Account.Value with Balance = (state.Account.Value.Balance + money) }
+                (BalanceUpdated { 
+                    Account = account; 
+                    Diff = money }) |> PersistEvent
+
     let init (env: _)  (actorApi: IActor) =
-        // initial state
-        let initialState = {  Account = None; }
-        // initialize actor by giving shard type name in this "Accounting"
+        let initialState = {  Account = None; Resevations = [] }
         actorApi.InitializeActor env initialState "Accounting"  handleCommand applyEvent
 
-
-    // creates a cluster sharder  actor given entity id and default shart can be changed
-    let factory (env: _)  actorApi entityId =
-        (init env actorApi).RefFor DEFAULT_SHARD entityId
+    let factory (env: #_)  actorApi entityId =
+        (init env  actorApi).RefFor DEFAULT_SHARD entityId

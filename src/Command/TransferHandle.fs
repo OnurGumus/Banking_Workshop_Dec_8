@@ -1,22 +1,30 @@
-module internal TransferHandle
+module internal TransferHandler
 
 open Banking.Command
 open Banking.Model.Command.Accounting
-open Banking.Model.Data
 open FCQRS.Common
-open FCQRS.Model.Aether
-open FCQRS.Model.Aether.Operators
 open FCQRS.Model.Data
 open Domain.Transfer
 open System
-let deposit createSubs : Transfer =
-    fun transferDetail ->
-        let actorId = "Transfer_" + Guid.NewGuid().ToString()
-        async {
-            let! subscr = createSubs actorId (Transfer transferDetail) (fun (e: Event) -> match e with | TransferRequested _ -> true)
 
-            match subscr with 
-            | {EventDetails = TransferRequested _; Version = v} -> 
-                return v |> ValueLens.TryCreate |> Result.mapError (fun e -> [e.ToString()])
+let transfer createSubs : Transfer =
+    fun  transferDetails ->
+        let actorId  =  "Transfer_" + Guid.NewGuid().ToString()
+        async {
+            let! subscribe =
+                createSubs actorId (Transfer(transferDetails)) 
+                    (fun (e: Event) ->e.IsAnotherTransferIsInProgress || e.IsMoneyTransferred || e.IsTransferAborted  )
+            match subscribe with
+            | {
+                  EventDetails = MoneyTransferred _
+                  Version = v
+              } -> 
+                return  v |> ValueLens.TryCreate |> Result.mapError (fun e -> [e.ToString()])
+            | {
+                  EventDetails =   _
+                  Version = v
+              } -> return   Error [sprintf "TransferFailed failed for account %s" <| actorId.ToString()]
         }
-     
+
+
+

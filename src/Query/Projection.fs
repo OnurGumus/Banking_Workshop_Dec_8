@@ -12,6 +12,8 @@ let handleEventWrapper (ctx: Sql.dataContext) (offsetValue) (event: obj) =
             match event with
             | :? Event<Account.Event> as  event ->
                 AccountProjection.handle ctx event
+             | :? Event<Transfer.Event> as  event ->
+                TransferProjection.handle ctx event
             | _ -> []
         // select the offset and update it
         let offset = ctx.Main.Offsets.Individuals.Banking
