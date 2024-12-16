@@ -12,7 +12,8 @@ open SqlProvider
 open FCQRS.Model.Data
 open Banking.Application.Event
 
-
+// gets db context (connection ) and and event, updates db and returns new event
+// that event is a DTO style event, not the event we persisted. It's defined Applicatioin Projec
 let handle (ctx: Sql.dataContext)(e:FCQRS.Common.Event<Account.Event>) =
     let eventDetails = e.EventDetails
     let cid = e.CorrelationId

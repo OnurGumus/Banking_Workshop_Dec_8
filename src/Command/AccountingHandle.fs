@@ -11,12 +11,14 @@ open Domain.Account
 
 let deposit createSubs : Deposit =
     fun operationDetails ->
+    // fulfills the Deposit command, given actor id as string, command, and event to wait for filtering
         let actorId  = 
             "Account_" +  
                 (operationDetails.AccountName ^. (Lens.toValidated AccountName.Value_ >-> ShortString.Value_  ))
         async{
             let! subscr = createSubs actorId (Deposit operationDetails) (fun (e:Event) -> match e with | BalanceUpdated _ -> true)
             
+            // convert the type which satisifies Deposit command
             match subscr with
             | {EventDetails = BalanceUpdated _;   Version  = v } ->  
                 return  v |> ValueLens.TryCreate |> Result.mapError (fun e -> [e.ToString()])

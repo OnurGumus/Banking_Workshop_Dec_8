@@ -7,6 +7,7 @@ open FluentMigrator.Runner
 open Microsoft.Extensions.Configuration
 open System.Collections.Generic
 
+// Zero is for reseting the databas
 [<MigrationAttribute(0L)>]
 type Zero() =
     inherit Migration()
@@ -15,6 +16,7 @@ type Zero() =
 
     override this.Down() = ()
 
+    // reset akka stuff if db is reset
 [<MigrationAttribute(1L)>]
 type One() =
     inherit Migration()
@@ -31,6 +33,8 @@ type One() =
                 this.Execute.Sql("DELETE FROM TAGS")
         with _ ->
             ()
+
+    // Creates offset table which is used for event sourciing and booking the last processed event id
 [<MigrationAttribute(2L)>]
 type AddOffsetsTable() =
     inherit AutoReversingMigration()
@@ -53,6 +57,9 @@ type AddOffsetsTable() =
 
         this.Insert.IntoTable("Offsets").Row(dict) |> ignore
 
+    // Creates the accounts table
+    // with 2 PK, UserIDentity and AccountName
+    // Also has a document field for serialziing entire account
 [<MigrationAttribute(2024_12_04_2102L)>]
 type AddAcountsTable() =
     inherit AutoReversingMigration()
@@ -85,6 +92,7 @@ type AddAcountsTable() =
             .Indexed()
         |> ignore
 
+// boiler plate code for fluent migrator
 
 
 let updateDatabase (serviceProvider: IServiceProvider) =
@@ -113,13 +121,14 @@ let createServices (config: IConfiguration) =
             |> ignore)
         .AddLogging(fun lb -> lb.AddFluentMigratorConsole() |> ignore)
         .BuildServiceProvider(false)
-
+// initialize the db
 let init (env: _) =
     let config = env :> IConfiguration
     use serviceProvider = createServices config
     use scope = serviceProvider.CreateScope()
     updateDatabase scope.ServiceProvider
-
+    
+// clears the db remove all tables
 let reset (env: _) =
     let config = env :> IConfiguration
     use serviceProvider = createServices config

@@ -18,11 +18,15 @@ let api (env: _) =
     let config = env :> IConfiguration
     let loggerFactory = env :> ILoggerFactory
     
+    // initialize FCQRS acommand api
     let actorApi = FCQRS.Actor.api config loggerFactory
     let actorFactories = Command.Domain.ActorFactories.factories env actorApi
+    // get a subscriber send commands
     let accountSubs =  actorApi.CreateCommandSubscription actorFactories.AccountFactory
-    let transferSubs = actorApi.CreateCommandSubscription actorFactories.TransferFactory
 
+
+    let transferSubs = actorApi.CreateCommandSubscription actorFactories.TransferFactory
+// just and interface first params should CID for internal tracking
     { new IAPI with
         member _.Withdraw cid = failwith "Not implemented"
         member _.Deposit cid =
