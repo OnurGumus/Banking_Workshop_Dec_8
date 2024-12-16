@@ -58,24 +58,27 @@ let positiveMoney :PositiveMoney = money |> ValueLens.TryCreate |> Result.value
 let operationDetails = { UserIdentity = userIdentity; AccountName = accountName ; Money = positiveMoney} 
 
 let transferDetails: TransferDetails =  { OperationDetails = operationDetails; DestinationAccountName = accountName }
+
+
+   
 let result = accounting.Transfer cid transferDetails |> Async.RunSynchronously
 
 printfn "!!%A" result
 
 Console.ReadLine() |> ignore
 
-// let deposit = accounting.Deposit
+let deposit = accounting.Deposit
 
-// let readSideSubs = query.Subscribe((fun e -> e.CID = cid), 1, ignore, CancellationToken.None) |> Async.StartImmediateAsTask
-// let accountingDeposit = deposit cid operationDetails |> Async.RunSynchronously
+let readSideSubs = query.Subscribe((fun e -> e.CID = cid), 1, ignore, CancellationToken.None) |> Async.StartImmediateAsTask
+let accountingDeposit = deposit cid operationDetails |> Async.RunSynchronously
 
-// printfn "%A" accountingDeposit
+printfn "%A" accountingDeposit
 
-// readSideSubs.Wait()
-// let accounts = query.Query<Account>(filter = Or(Greater("Balance", 9), 
-//         Equal("AccountName","foo")), take = 1, skip = 0, orderby = "Balance") |> Async.RunSynchronously
-// printfn "Accounts %A" accounts
+readSideSubs.Wait()
+let accounts = query.Query<Account>(filter = Or(Greater("Balance", 9), 
+        Equal("AccountName","foo")), take = 1, skip = 0, orderby = "Balance") |> Async.RunSynchronously
+printfn "Accounts %A" accounts
 
-// Console.ReadLine() |> ignore
+Console.ReadLine() |> ignore
 
-// printfn "%s" connString
+printfn "%s" connString

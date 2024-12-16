@@ -50,8 +50,8 @@ let handle (ctx: Sql.dataContext)(e:FCQRS.Common.Event<Account.Event>) =
                 )
             row.AccountName <- accountName
             row.UserIdentity <- owner
-        Some {
+        [{
                 Type = AccountEvent(BalanedUpdated account)
                 CID = cid
-            }
+            }]
             
