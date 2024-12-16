@@ -6,8 +6,6 @@ open FCQRS.Common
 open Banking.Command.Domain
 open SqlProvider
 
-type CID = FCQRS.Model.Data.CID
-
 let handleEventWrapper (ctx: Sql.dataContext) (offsetValue) (event: obj) =
         let dataEvent =
             match event with
