@@ -32,7 +32,7 @@ let factories (env: #_) (actorApi: IActor) =
 
 
     
-    actorApi.InitializeSagStarter sagaCheck
+    actorApi.InitializeSagaStarter sagaCheck
 
 // initialize all shards
     Account.Actor.init env  actorApi |> ignore
