@@ -15,6 +15,7 @@ let deposit createSubs : Deposit =
         let actorId  = 
             "Account_" +  
                 (operationDetails.AccountName ^. (Lens.toValidated AccountName.Value_ >-> ShortString.Value_  ))
+        let actorId:ActorId = actorId |> ValueLens.CreateAsResult |> Result.value
         async{
             let! subscr = createSubs actorId (Deposit operationDetails) (fun (e:Event) -> e.IsBalanceUpdated)
             
@@ -24,10 +25,10 @@ let deposit createSubs : Deposit =
                   EventDetails = BalanceUpdated _
                   Version = v
               } -> 
-                return  v |> ValueLens.TryCreate |> Result.mapError (fun e -> [e.ToString()])
+                return Ok v
             | {
                   EventDetails =   _
-                  Version = v
+                  Version = _
               } -> return   Error [sprintf "Deposit failed for account %s" <| actorId.ToString()]
         }
         

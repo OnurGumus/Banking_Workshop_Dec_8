@@ -38,7 +38,7 @@ let handle (ctx: Sql.dataContext)(e:FCQRS.Common.Event<Account.Event>) =
             row.Balance <- balance
             row.Document <- serialize
             row.UpdatedAt <- System.DateTime.UtcNow
-            row.Version <- e.Version
+            row.Version <- e.Version |> ValueLens.Value
 
         | None ->
             let row =
@@ -47,7 +47,7 @@ let handle (ctx: Sql.dataContext)(e:FCQRS.Common.Event<Account.Event>) =
                     System.DateTime.UtcNow,
                     encodeToBytes account,
                     System.DateTime.UtcNow,
-                    e.Version
+                    e.Version |> ValueLens.Value
                 )
             row.AccountName <- accountName
             row.UserIdentity <- owner

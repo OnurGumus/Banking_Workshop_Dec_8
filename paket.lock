@@ -111,7 +111,7 @@ NUGET
       Microsoft.CSharp (>= 4.7) - restriction: && (< net40) (>= netstandard2.0)
       System.ComponentModel (>= 4.3) - restriction: && (< net40) (>= netstandard2.0)
     Fable.Package.SDK (1.3) - restriction: >= net9.0
-    FCQRS (1.7.5)
+    FCQRS (1.8)
       Akka.Cluster.Sharding (>= 1.5.32) - restriction: >= net9.0
       Akka.Cluster.Tools (>= 1.5.32) - restriction: >= net9.0
       Akka.Persistence.Query.Sql (>= 1.5.32) - restriction: >= net9.0
@@ -119,7 +119,7 @@ NUGET
       Akkling.Cluster.Sharding (>= 0.16.2) - restriction: >= net9.0
       Akkling.Persistence (>= 0.16.2) - restriction: >= net9.0
       Akkling.Streams (>= 0.16.2) - restriction: >= net9.0
-      FCQRS.Model (>= 1.7.3) - restriction: >= net9.0
+      FCQRS.Model (>= 1.8) - restriction: >= net9.0
       FCQRS.Serialization (>= 1.7.3) - restriction: >= net9.0
       FSharp.Core (>= 9.0.100) - restriction: >= net9.0
       FSharp.Interop.Dynamic (>= 5.0.1.268) - restriction: >= net9.0
@@ -127,7 +127,7 @@ NUGET
       FsToolkit.ErrorHandling (>= 4.18) - restriction: >= net9.0
       Microsoft.Data.Sqlite (>= 9.0) - restriction: >= net9.0
       Microsoft.Extensions.Configuration (>= 9.0) - restriction: >= net9.0
-    FCQRS.Model (1.7.3)
+    FCQRS.Model (1.8)
       Fable.Package.SDK (>= 1.3) - restriction: >= net9.0
       FSharp.Core (>= 9.0.100) - restriction: >= net9.0
     FCQRS.Serialization (1.7.3)
